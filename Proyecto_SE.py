@@ -149,48 +149,7 @@ def habilitar_campos(event):
         else:
             monto_solicitado_entry.config(state='normal')
 
-def agregar_regla():
-    try:
-        tipo_prestamo = tipo_prestamo_entry_add.get()
-        ingreso_mensual = float(ingreso_mensual_entry_add.get())
-        monto_maximo = float(monto_maximo_entry_add.get())
-        conclusion = conclusion_entry_add.get()
-        
-        # Insertar en la base de datos
-        cursor.execute('''
-            INSERT INTO Reglas (tipo_prestamo, ingreso_mensual_minimo, monto_maximo_solicitado)
-            VALUES (?, ?, ?)
-        ''', (tipo_prestamo, ingreso_mensual, monto_maximo))
 
-        # Obtener el id_regla recién insertado
-        cursor.execute('SELECT SCOPE_IDENTITY()')
-        id_regla = cursor.fetchone()[0]
-        
-        # Insertar en la tabla de conclusiones
-        cursor.execute('''
-            INSERT INTO conclusiones (tipo_prestamo, descripcion_prestamo)
-            VALUES (?, ?);
-        ''', (tipo_prestamo, conclusion))
-
-        # Obtener el id_conclusion recién insertado
-        cursor.execute('SELECT SCOPE_IDENTITY()')
-        id_conclusion = cursor.fetchone()[0]
-
-        # Insertar en la tabla intermedia
-        cursor.execute('''
-            INSERT INTO Reglas_Conclusiones (id_regla, id_conclusion)
-            VALUES (?, ?);
-        ''', (id_regla, id_conclusion))
-
-        conn.commit()
-        messagebox.showinfo("Éxito", "Regla y conclusión agregadas exitosamente.")
-        
-        # Limpiar campos
-        limpiar_campos_agregar()
-
-    except Exception as e:
-        messagebox.showerror("Error", f"No se pudo agregar la regla: {e}")
- 
 
 def limpiar_campos_agregar():
     ingreso_mensual_entry_add.delete(0, tk.END)
@@ -210,9 +169,6 @@ notebook.pack(expand=True, fill='both')
 evaluacion_frame = ttk.Frame(notebook)
 notebook.add(evaluacion_frame, text="Evaluación de Préstamos")
 
-# Pestaña de agregar reglas
-agregar_frame = ttk.Frame(notebook)
-notebook.add(agregar_frame, text="Agregar Reglas")
 
 # Widgets para la pestaña de evaluación
 tk.Label(evaluacion_frame, text="Seleccione el Tipo de Préstamo:").grid(row=0, column=0, padx=10, pady=10)
@@ -255,25 +211,6 @@ costo_viaje_entry.grid(row=8, column=1)
 enviar_button = tk.Button(evaluacion_frame, text="Evaluar", command=enviar_datos)
 enviar_button.grid(row=9, column=0, columnspan=2, pady=10)
 
-# Widgets para agregar reglas en la pestaña de agregar reglas
-tk.Label(agregar_frame, text="Tipo de Préstamo:").grid(row=0, column=0, padx=10, pady=10)
-tipo_prestamo_entry_add = tk.Entry(agregar_frame)
-tipo_prestamo_entry_add.grid(row=0, column=1)
-
-tk.Label(agregar_frame, text="Ingreso Mensual Mínimo:").grid(row=1, column=0, padx=10, pady=10)
-ingreso_mensual_entry_add = tk.Entry(agregar_frame)
-ingreso_mensual_entry_add.grid(row=1, column=1)
-
-tk.Label(agregar_frame, text="Monto Máximo Solicitado:").grid(row=2, column=0)
-monto_maximo_entry_add = tk.Entry(agregar_frame)
-monto_maximo_entry_add.grid(row=2, column=1)
-
-tk.Label(agregar_frame, text="Conclusión:").grid(row=3, column=0)
-conclusion_entry_add = tk.Entry(agregar_frame)
-conclusion_entry_add.grid(row=3, column=1)
-
-agregar_button = tk.Button(agregar_frame, text="Agregar Regla", command=agregar_regla)
-agregar_button.grid(row=4, column=0, columnspan=2, pady=10)
 
 # Conexión a la base de datos y obtención de reglas y conclusiones
 try:
